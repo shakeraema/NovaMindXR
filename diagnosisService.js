@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = (typeof process !== 'undefined' ? process.env.VITE_BACKEND_URL : null) || 'http://localhost:5001';
 
 export async function diagnoseConfusion(studentInput) {
   try {
