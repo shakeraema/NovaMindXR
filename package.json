@@ -1,0 +1,13 @@
+{
+  "name": "novamind-ema",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Ema's AI Cognitive Diagnosis Engine module",
+  "main": "diagnosisService.js",
+  "scripts": {
+    "test": "node testRunner.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
