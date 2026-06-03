@@ -32,3 +32,19 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
+# Team workspace folders (each member manages their own branch/repository separately)
+ema/
+zahid/
+mehrab/
+nivrita/
+
+# Plan and documentation files
+INITIAL_PLAN.md
+NovaMind XR — Phase 1 Implementation Plan.md
+novamind_mvp_plan.html
+phase1.md
+phase1_architecture.svg
+phase1_walkthrough.md
+
+
