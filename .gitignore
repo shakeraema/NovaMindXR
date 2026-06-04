@@ -36,8 +36,8 @@ lerna-debug.log*
 # Team workspace folders (each member manages their own branch/repository separately)
 ema/
 zahid/
-mehrab/
 nivrita/
+mehrab/
 
 # Plan and documentation files
 INITIAL_PLAN.md
@@ -47,4 +47,8 @@ phase1.md
 phase1_architecture.svg
 phase1_walkthrough.md
 
-
+full chat project.md
+NovaMind XR — Phase 2 Implementation Plan.md
+phase2_data_flow.svg
+phase2.md
+phase3.md
