@@ -56,18 +56,20 @@ export default function SimulationScreen({ result, studentInput, onBack, lang })
     setMentorInput(suggestion);
   }, [activeEnv, lang]);
 
-  // Dynamically translate the welcome Socratic message when language toggles
+  // Dynamically set/translate the welcome Socratic suggestion when world or language toggles
   useEffect(() => {
     setMentorMessages(prev => {
       if (prev.length <= 1) {
+        const suggestions = WORLD_SUGGESTIONS[lang] || WORLD_SUGGESTIONS.EN;
+        const suggestion = suggestions[activeEnv] || suggestions.gravity_lab;
         const text = lang === 'BN'
-          ? "স্বাগতম! আমি আপনার সক্রেটিক মেন্টর। আপনি নিচের পরামর্শমূলক প্রশ্নটি পরিবর্তন করতে পারেন অথবা সরাসরি জিজ্ঞেস করতে 'জিজ্ঞেস করুন' বাটনে ক্লিক করতে পারেন।"
-          : "Welcome! I am your AI Socratic Mentor. You can edit the preloaded question below and click Ask to begin your inquiry, or ask anything you wish.";
+          ? `স্বাগতম! এই সিমুলেশনে, জিজ্ঞেস করে দেখতে পারেন: "${suggestion}" অথবা ডানপাশের প্যানেল থেকে ভ্যারিয়েবলগুলো পরিবর্তন করুন।`
+          : `Welcome! In this simulation, try asking: "${suggestion}" or adjust the variables in the panel.`;
         return [{ role: 'mentor', text }];
       }
       return prev;
     });
-  }, [lang]);
+  }, [activeEnv, lang]);
 
   // Accessibility & Blockchain states
   const [isListening, setIsListening] = useState(false);

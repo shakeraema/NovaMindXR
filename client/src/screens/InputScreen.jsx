@@ -1,25 +1,37 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function InputScreen({ onSubmit, lang, onLangToggle, onFacultyClick }) {
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [showExploreMenu, setShowExploreMenu] = useState(false);
+  const exploreMenuRef = useRef(null);
 
-  const examples = {
+  const worldsInfo = {
     EN: [
-      { text: "Why don't heavier objects fall faster?", icon: "🌍", label: "Gravity & Mass" },
-      { text: "Why doesn't the Moon fall down to Earth?", icon: "🪐", label: "Planetary Orbits" },
-      { text: "I don't understand wave interference", icon: "〰", label: "Wave Interference" },
-      { text: "Why does salt dissolve in water but oil doesn't?", icon: "⚛", label: "Molecular Energy" },
-      { text: "I'm confused about voltage vs current", icon: "⚡", label: "Ohm's Law Circuits" },
-      { text: "Why does salty water make objects float higher?", icon: "🌊", label: "Oceanic Buoyancy" }
+      { id: "gravity_lab", name: "Gravity Lab", icon: "🌍", text: "Why don't heavier objects fall faster than feathers in a vacuum?" },
+      { id: "orbit_sim", name: "Keplerian Orbit", icon: "🪐", text: "Why doesn't the Moon fall down to Earth if gravity pulls it?" },
+      { id: "wave_lab", name: "Wave Superposition", icon: "〰", text: "How can two waves cancel each other out to create silence?" },
+      { id: "molecular", name: "Molecular Sandbox", icon: "⚛", text: "Why does heating salt make it dissolve, but it doesn't split chemical bonds?" },
+      { id: "circuit_flow", name: "Ohm's Law Circuit", icon: "⚡", text: "Is current consumed by a bulb, or is it conserved in a circuit loop?" },
+      { id: "ocean", name: "Ocean Diving", icon: "🌊", text: "Why does salinity make objects float higher?" },
+      { id: "quantum_slit", name: "Quantum Double-Slit", icon: "🔬", text: "Why does observing a quantum particle collapse its wave function?" },
+      { id: "relativity_run", name: "Relativity Racetrack", icon: "🚀", text: "Does traveling near the speed of light actually make time slow down?" },
+      { id: "maxwell_demon", name: "Maxwell's Demon", icon: "😈", text: "Can a microscopic sorting demon violate the second law of thermodynamics?" },
+      { id: "aerodynamics", name: "Aerodynamic Wing", icon: "✈", text: "Why does a plane lose lift and stall when the angle of attack is too high?" },
+      { id: "lenzs_law", name: "Lenz's Law Induction", icon: "🧲", text: "How does a falling magnet induce currents that slow its own descent?" }
     ],
     BN: [
-      { text: "কেন ভারী বস্তু হালকা বস্তুর চেয়ে দ্রুত পড়ে না?", icon: "🌍", label: "মহাকর্ষ ও ভর" },
-      { text: "চাঁদ কেন পৃথিবীতে আছড়ে পড়ে না?", icon: "🪐", label: "গ্রহের কক্ষপথ" },
-      { text: "আমি তরঙ্গের ব্যতিচার বুঝি না", icon: "〰", label: "তরঙ্গ ব্যতিচার" },
-      { text: "লবণ কেন পানিতে দ্রবীভূত হয় কিন্তু তেল হয় না?", icon: "⚛", label: "আণবিক শক্তি" },
-      { text: "আমি ভোল্টেজ বনাম কারেন্টের বিষয়টি নিয়ে দ্বিধান্বিত", icon: "⚡", label: "ওহমের সূত্র বর্তনী" },
-      { text: "লবণাক্ত পানি কেন বস্তুকে বেশি ভাসিয়ে রাখে?", icon: "🌊", label: "প্লবতা ও ঘনত্ব" }
+      { id: "gravity_lab", name: "মাধ্যাকর্ষণ ল্যাব", icon: "🌍", text: "কেন ভারী বস্তু পালকের চেয়ে দ্রুত পড়ে না মহাশূন্যে?" },
+      { id: "orbit_sim", name: "কেপলারীয় কক্ষপথ", icon: "🪐", text: "চাঁদ কেন পৃথিবীতে আছড়ে পড়ে না মাধ্যাকর্ষণের টানেও?" },
+      { id: "wave_lab", name: "তরঙ্গ ব্যতিচার", icon: "〰", text: "দুটি তরঙ্গ কীভাবে একে অপরকে বাতিল করে নীরবতা সৃষ্টি করে?" },
+      { id: "molecular", name: "আণবিক স্যান্ডবক্স", icon: "⚛", text: "তাপ দিলে লবণ কেন দ্রবীভূত হয় কিন্তু রাসায়নিক বন্ধন ভাঙে না?" },
+      { id: "circuit_flow", name: "বর্তনী প্রবাহ", icon: "⚡", text: "কারেন্ট কি বাল্ব দ্বারা গ্রাস হয়ে যায় নাকি সংরক্ষিত থাকে?" },
+      { id: "ocean", name: "মহাসাগর ডাইভিং", icon: "🌊", text: "লবণাক্ততা বৃদ্ধি পেলে বস্তু কেন বেশি ভেসে থাকে?" },
+      { id: "quantum_slit", name: "কোয়ান্টাম দ্বি-চিড়", icon: "🔬", text: "কোয়ান্টাম কণা পর্যবেক্ষণ করলে এর তরঙ্গ ফাংশন কেন ভেঙে যায়?" },
+      { id: "relativity_run", name: "আপেক্ষিকতার রেসট্র্যাক", icon: "🚀", text: "আলোর কাছাকাছি বেগে ভ্রমণ করলে কি সময় সত্যিই ধীর হয়ে যায়?" },
+      { id: "maxwell_demon", name: "ম্যাক্সওয়েলের ডেমন", icon: "😈", text: "একটি অণুবীক্ষণিক কণা ছাঁটাইকারী কি তাপগতিবিদ্যার সূত্র লঙ্ঘন করতে পারে?" },
+      { id: "aerodynamics", name: "উইং টানেল", icon: "✈", text: "উইংসের কোণ বেশি বাড়ালে কেন প্লেন তার লিফট হারিয়ে ফেলে?" },
+      { id: "lenzs_law", name: "লেঞ্জের সূত্র আবেশন", icon: "🧲", text: "পতনশীল চুম্বক কীভাবে আবেশন সৃষ্টি করে নিজের গতি ধীর করে?" }
     ]
   };
 
@@ -27,26 +39,39 @@ export default function InputScreen({ onSubmit, lang, onLangToggle, onFacultyCli
     EN: {
       title: "NovaMind XR",
       subtitle: "AI-Powered Scientific Concept Diagnostic Sandbox",
-      welcomeTitle: "What scientific concept is confusing you?",
-      welcomeSub: "Describe your misconception or type a question below, and I will generate a real-time interactive 3D simulation to analyze and visualize it.",
-      placeholder: "Describe a scientific misconception... (e.g. Why does a heavy object fall at the same speed as a feather in a vacuum?)",
-      footer: "Press Enter to submit · Accredited by Daffodil International University Blockchain",
-      sidebarHeader: "Example Misconceptions",
-      sidebarSub: "Select to load into input box"
+      welcomeTitle: "What scientific concept is confusing you today?",
+      welcomeSub: "Select a card below to immediately jump into a simulation, or ask a custom question to generate a targeted interactive 3D learning world.",
+      placeholder: "Ask about a scientific misconception... (e.g. Why does a heavy object fall at the same speed as a feather in a vacuum?)",
+      footer: "Direct client diagnosis · Daffodil International University Lightweight Blockchain Credentials",
+      btnExplore: "🧭 Explore Worlds",
+      btnFaculty: "📊 Faculty Dashboard",
+      labelSuggested: "Suggested Scientific Inquiries"
     },
     BN: {
       title: "নোভামাইন্ড এক্সআর",
       subtitle: "এআই-চালিত বৈজ্ঞানিক ধারণা অনুসন্ধান স্যান্ডবক্স",
       welcomeTitle: "কোন বৈজ্ঞানিক ধারণাটি আপনাকে দ্বিধান্বিত করছে?",
-      welcomeSub: "আপনার ভুল ধারণা বা প্রশ্নটি নিচে বর্ণনা করুন, এবং আমি এটি বিশ্লেষণ ও প্রদর্শনের জন্য একটি রিয়েল-টাইম থ্রিডি সিমুলেশন তৈরি করব।",
-      placeholder: "একটি বৈজ্ঞানিক ভুল ধারণা লিখুন... (যেমনঃ মহাশূন্যে পালক ও লোহার বল কেন একই গতিতে পড়ে?)",
-      footer: "জমা দিতে Enter চাপুন · ড্যাফোডিল ইন্টারন্যাশনাল ইউনিভার্সিটি ব্লকচেইন দ্বারা অনুমোদিত",
-      sidebarHeader: "উদাহরণ ভুল ধারণাসমূহ",
-      sidebarSub: "ইনপুট বক্সে লোড করতে ক্লিক করুন"
+      welcomeSub: "সরাসরি সিমুলেশনে প্রবেশ করতে নিচের কার্ডগুলোতে ক্লিক করুন, অথবা থ্রিডি লার্নিং ওয়ার্ল্ড তৈরি করতে আপনার নিজস্ব প্রশ্ন নিচে জিজ্ঞেস করুন।",
+      placeholder: "বৈজ্ঞানিক ভুল ধারণা সম্পর্কে জিজ্ঞেস করুন... (যেমনঃ মহাশূন্যে পালক ও লোহার বল কেন একই গতিতে পড়ে?)",
+      footer: "সরাসরি ক্লায়েন্ট ডায়াগনোসিস · ড্যাফোডিল ইন্টারন্যাশনাল ইউনিভার্সিটি লাইটওয়েট ব্লকচেইনের প্রমাণপত্র",
+      btnExplore: "🧭 এক্সপ্লোর ওয়ার্ল্ডস",
+      btnFaculty: "📊 ফ্যাকাল্টি ড্যাশবোর্ড",
+      labelSuggested: "প্রস্তাবিত বৈজ্ঞানিক অনুসন্ধানসমূহ"
     }
   };
 
-  const currentText = texts[lang];
+  const t = texts[lang];
+
+  // Close explore menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (exploreMenuRef.current && !exploreMenuRef.current.contains(event.target)) {
+        setShowExploreMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleVoiceInput = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -82,307 +107,189 @@ export default function InputScreen({ onSubmit, lang, onLangToggle, onFacultyCli
   return (
     <div style={{
       display: 'flex',
+      flexDirection: 'column',
       height: '100vh',
       width: '100vw',
       background: '#030308',
       color: '#e2e8f0',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      overflow: 'hidden',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      overflowX: 'hidden',
+      overflowY: 'auto'
     }}>
       <style>{`
-        .custom-sidebar-scroll::-webkit-scrollbar {
-          width: 5px;
+        ::-webkit-scrollbar {
+          width: 8px;
         }
-        .custom-sidebar-scroll::-webkit-scrollbar-track {
-          background: transparent;
+        ::-webkit-scrollbar-track {
+          background: #030308;
         }
-        .custom-sidebar-scroll::-webkit-scrollbar-thumb {
-          background: rgba(59, 130, 246, 0.15);
-          border-radius: 10px;
+        ::-webkit-scrollbar-thumb {
+          background: rgba(59, 130, 246, 0.25);
+          border-radius: 4px;
         }
-        .custom-sidebar-scroll::-webkit-scrollbar-thumb:hover {
-          background: rgba(59, 130, 246, 0.35);
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(59, 130, 246, 0.45);
         }
       `}</style>
       
-      {/* Left Sidebar Panel - Conversation / Misconception History */}
+      {/* Top Header Navigation */}
       <div style={{
-        width: '320px',
-        background: '#070712',
-        borderRight: '1px solid rgba(59, 130, 246, 0.15)',
         display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 16px',
-        boxSizing: 'border-box',
-        height: '100%',
         justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 36px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.02)',
+        background: '#060613',
         flexShrink: 0
       }}>
-        
-        {/* Top Branding Section */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(99, 102, 241, 0.3)'
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-              </svg>
-            </div>
-            <div>
-              <h1 style={{ color: '#ffffff', fontSize: '18px', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
-                {currentText.title}
-              </h1>
-              <p style={{ color: '#60a5fa', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '2px 0 0' }}>
-                DIU XR Engine
-              </p>
-            </div>
-          </div>
-          <p style={{ color: '#64748b', fontSize: '11px', lineHeight: 1.4, margin: '8px 0 24px' }}>
-            {currentText.subtitle}
-          </p>
-
-          <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '0 0 20px' }} />
-
-          {/* Examples Header */}
-          <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
-            {currentText.sidebarHeader}
-          </span>
-          <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '14px' }}>
-            {currentText.sidebarSub}
-          </span>
-
-          {/* List of Clickable Examples */}
-          <div className="custom-sidebar-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '50vh', overflowY: 'auto', paddingRight: '4px' }}>
-            {examples[lang].map((ex) => (
-              <button
-                key={ex.text}
-                onClick={() => setInput(ex.text)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '10px',
-                  padding: '12px',
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.05)',
-                  borderRadius: '10px',
-                  color: '#94a3b8',
-                  fontSize: '12.5px',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxSizing: 'border-box'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(59, 130, 246, 0.06)';
-                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.25)';
-                  e.currentTarget.style.color = '#cbd5e1';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
-                  e.currentTarget.style.color = '#94a3b8';
-                }}
-              >
-                <span style={{ fontSize: '16px', flexShrink: 0 }}>{ex.icon}</span>
-                <div>
-                  <span style={{ display: 'block', fontWeight: 600, fontSize: '11px', color: '#60a5fa', marginBottom: '2px' }}>
-                    {ex.label}
-                  </span>
-                  <span style={{ lineHeight: 1.4, display: 'block' }}>{ex.text}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom Actions Section */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button
-            onClick={onFacultyClick}
-            style={{
-              width: '100%',
-              background: 'rgba(99, 102, 241, 0.06)',
-              border: '1px solid rgba(99, 102, 241, 0.25)',
-              borderRadius: '12px',
-              color: '#a5b4fc',
-              padding: '12px',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              textAlign: 'center',
-              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.05)'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(99, 102, 241, 0.15)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(99, 102, 241, 0.06)'}
-          >
-            📊 {lang === 'EN' ? 'Faculty Analytics Dashboard' : 'ফ্যাকাল্টি অ্যানালিটিক্স পোর্টাল'}
-          </button>
-        </div>
-
-      </div>
-
-      {/* Right Main Interface Panel */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        background: 'radial-gradient(circle at center, #0a0a20 0%, #030308 100%)',
-        position: 'relative',
-        boxSizing: 'border-box'
-      }}>
-        
-        {/* Top Header Navigation */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          padding: '16px 24px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
-          flexShrink: 0
-        }}>
-          <button 
-            onClick={onLangToggle}
-            style={{
-              background: 'rgba(59, 130, 246, 0.15)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-              borderRadius: '20px',
-              color: '#60a5fa',
-              padding: '6px 16px',
-              fontSize: '12px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.25)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)'}
-          >
-            {lang === 'EN' ? 'বাংলা' : 'English'}
-          </button>
-        </div>
-
-        {/* Central Assistant Welcome Screen */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '40px 24px',
-          maxWidth: '800px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-          textAlign: 'center'
-        }}>
-          
-          {/* Main Glowing Orb / Assistant Logo */}
+        {/* Logo Branding */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
-            width: '72px',
-            height: '72px',
+            width: '32px',
+            height: '32px',
             background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-            borderRadius: '22px',
-            margin: '0 auto 24px',
+            borderRadius: '8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 35px rgba(99, 102, 241, 0.45)',
-            position: 'relative'
+            boxShadow: '0 0 10px rgba(99, 102, 241, 0.3)'
           }}>
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
               <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
               <line x1="12" y1="22.08" x2="12" y2="12"></line>
             </svg>
           </div>
-
-          <h2 style={{ color: '#ffffff', fontSize: '28px', fontWeight: 700, margin: '0 0 12px', letterSpacing: '-0.02em' }}>
-            {currentText.welcomeTitle}
-          </h2>
-          <p style={{ color: '#94a3b8', fontSize: '15px', lineHeight: 1.6, margin: '0 0 28px', maxWidth: '580px' }}>
-            {currentText.welcomeSub}
-          </p>
-
-          {/* Quick Info Badges */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '16px' }}>
-            {["✨ 6 Science Simulation Worlds", "🛡️ Blockchain Ledger", "🎙️ Socratic Voice Dictation"].map((badge, idx) => (
-              <span 
-                key={idx}
-                style={{
-                  background: 'rgba(59, 130, 246, 0.05)',
-                  border: '1px solid rgba(59, 130, 246, 0.15)',
-                  borderRadius: '20px',
-                  color: '#60a5fa',
-                  padding: '6px 14px',
-                  fontSize: '12px',
-                  fontWeight: 500
-                }}
-              >
-                {badge}
-              </span>
-            ))}
+          <div>
+            <span style={{ color: 'white', fontWeight: 700, fontSize: '15px', letterSpacing: '-0.01em' }}>
+              {t.title}
+            </span>
+            <span style={{ color: '#64748b', fontSize: '9px', fontWeight: 600, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Daffodil International University
+            </span>
           </div>
-
         </div>
 
-        {/* Chat Box Input area (Bottom) */}
+        {/* Action Header controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <button
+            onClick={onFacultyClick}
+            style={{
+              background: 'rgba(99, 102, 241, 0.08)',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              borderRadius: '20px',
+              color: '#a5b4fc',
+              padding: '6px 14px',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(99, 102, 241, 0.15)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(99, 102, 241, 0.08)'}
+          >
+            {t.btnFaculty}
+          </button>
+
+          <button 
+            onClick={onLangToggle}
+            style={{
+              background: 'rgba(59, 130, 246, 0.12)',
+              border: '1px solid rgba(59, 130, 246, 0.25)',
+              borderRadius: '20px',
+              color: '#60a5fa',
+              padding: '6px 14px',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.22)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.12)'}
+          >
+            {lang === 'EN' ? 'বাংলা' : 'English'}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Centered Claude-Like Landing Container */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px 24px 8px 24px',
+        maxWidth: '960px',
+        width: '100%',
+        margin: '0 auto',
+        boxSizing: 'border-box'
+      }}>
+        
+        {/* Welcome Headline */}
+        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+          <h2 style={{
+            color: '#ffffff',
+            fontSize: '24px',
+            fontWeight: 800,
+            margin: '0 0 4px 0',
+            letterSpacing: '-0.02em',
+            background: 'linear-gradient(135deg, #ffffff 50%, #94a3b8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            {t.welcomeTitle}
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '12.5px', lineHeight: 1.5, margin: 0, maxWidth: '620px', marginLeft: 'auto', marginRight: 'auto' }}>
+            {t.welcomeSub}
+          </p>
+        </div>
+
+        {/* Central Chat Input Field Box (Similar to Claude Chat box) */}
         <div style={{
           width: '100%',
-          padding: '0 24px 36px 24px',
-          maxWidth: '800px',
-          margin: '0 auto',
-          boxSizing: 'border-box',
-          flexShrink: 0
+          maxWidth: '780px',
+          position: 'relative',
+          marginBottom: '16px'
         }}>
           
           <div style={{
             position: 'relative',
-            background: 'rgba(10, 10, 26, 0.8)',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
+            background: '#090918',
+            border: '1px solid rgba(59, 130, 246, 0.25)',
             borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.05)',
-            padding: '8px',
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(59, 130, 246, 0.05)',
+            padding: '12px 14px',
             boxSizing: 'border-box',
-            transition: 'border-color 0.25s, box-shadow 0.25s'
+            transition: 'border-color 0.2s, box-shadow 0.2s'
           }}
           onFocusCapture={e => {
             e.currentTarget.style.borderColor = '#60a5fa';
-            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.15)';
+            e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(59, 130, 246, 0.18)';
           }}
           onBlurCapture={e => {
-            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.05)';
+            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.25)';
+            e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(59, 130, 246, 0.05)';
           }}
           >
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder={currentText.placeholder}
+              placeholder={t.placeholder}
               style={{
                 width: '100%',
-                minHeight: '80px',
+                minHeight: '60px',
                 background: 'transparent',
                 border: 'none',
-                color: 'white',
-                fontSize: '15px',
-                padding: '12px 100px 12px 12px', // Extra right padding for microphone and send button
+                color: '#f8fafc',
+                fontSize: '14.5px',
+                padding: '2px 4px',
                 resize: 'none',
                 boxSizing: 'border-box',
                 outline: 'none',
                 fontFamily: 'sans-serif',
-                lineHeight: 1.6
+                lineHeight: 1.5
               }}
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
@@ -392,80 +299,223 @@ export default function InputScreen({ onSubmit, lang, onLangToggle, onFacultyCli
               }}
             />
 
-            {/* Actions Panel aligned inside box (Absolute at bottom right) */}
+            {/* Actions Panel nested inside the bottom row of input box */}
             <div style={{
-              position: 'absolute',
-              right: '12px',
-              bottom: '12px',
               display: 'flex',
-              gap: '8px',
-              alignItems: 'center'
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: '10px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.02)',
+              paddingTop: '8px',
+              flexWrap: 'wrap',
+              gap: '10px'
             }}>
               
-              {/* Voice recognition microphone button */}
-              <button
-                onClick={handleVoiceInput}
-                style={{
-                  background: isListening ? 'rgba(239, 68, 68, 0.2)' : 'rgba(59, 130, 246, 0.1)',
-                  border: isListening ? '1px solid #ef4444' : '1px solid rgba(59, 130, 246, 0.3)',
-                  borderRadius: '50%',
-                  width: '34px',
-                  height: '34px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: isListening ? '#f87171' : '#60a5fa',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                  boxShadow: isListening ? '0 0 10px rgba(239, 68, 68, 0.4)' : 'none'
-                }}
-                title={lang === 'EN' ? 'Voice Input' : 'ভয়েস ইনপুট'}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                  <line x1="12" y1="19" x2="12" y2="23"></line>
-                  <line x1="8" y1="23" x2="16" y2="23"></line>
-                </svg>
-              </button>
+              {/* Left Side: Explore Worlds dropdown trigger */}
+              <div style={{ position: 'relative' }} ref={exploreMenuRef}>
+                <button
+                  onClick={() => setShowExploreMenu(!showExploreMenu)}
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.08)',
+                    border: '1px solid rgba(59, 130, 246, 0.25)',
+                    borderRadius: '8px',
+                    color: '#60a5fa',
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)'}
+                >
+                  {t.btnExplore}
+                  <span style={{ fontSize: '10px' }}>{showExploreMenu ? '▲' : '▼'}</span>
+                </button>
 
-              {/* Submit Button */}
-              <button
-                onClick={() => input.trim() && onSubmit(input.trim())}
-                disabled={!input.trim()}
-                style={{
-                  background: input.trim() 
-                    ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)' 
-                    : 'rgba(255, 255, 255, 0.03)',
-                  color: input.trim() ? 'white' : '#475569',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '34px',
-                  height: '34px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: input.trim() ? 'pointer' : 'not-allowed',
-                  boxShadow: input.trim() ? '0 4px 12px rgba(59, 130, 246, 0.35)' : 'none',
-                  transition: 'all 0.25s ease',
-                  outline: 'none'
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-              </button>
+                {/* Explore Dropdown Overlay */}
+                {showExploreMenu && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 'calc(100% + 8px)',
+                    left: 0,
+                    background: '#080816',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.8)',
+                    width: '240px',
+                    zIndex: 200,
+                    maxHeight: '320px',
+                    overflowY: 'auto',
+                    padding: '6px'
+                  }}>
+                    {worldsInfo[lang].map(world => (
+                      <button
+                        key={world.id}
+                        onClick={() => {
+                          setShowExploreMenu(false);
+                          onSubmit(world.id);
+                        }}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#cbd5e1',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          fontSize: '12.5px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          transition: 'all 0.15s'
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                          e.currentTarget.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = 'transparent';
+                          e.currentTarget.style.color = '#cbd5e1';
+                        }}
+                      >
+                        <span style={{ fontSize: '15px' }}>{world.icon}</span>
+                        <span style={{ fontWeight: 600 }}>{world.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Side: Voice dictation + Send */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  onClick={handleVoiceInput}
+                  style={{
+                    background: isListening ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: isListening ? '#f87171' : '#64748b',
+                    transition: 'all 0.2s',
+                    outline: 'none'
+                  }}
+                  title={lang === 'EN' ? 'Voice input' : 'ভয়েস ইনপুট'}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                </button>
+
+                <button
+                  onClick={() => input.trim() && onSubmit(input.trim())}
+                  disabled={!input.trim()}
+                  style={{
+                    background: input.trim() 
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)' 
+                      : 'rgba(255, 255, 255, 0.02)',
+                    color: input.trim() ? 'white' : '#475569',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: input.trim() ? 'pointer' : 'not-allowed',
+                    boxShadow: input.trim() ? '0 4px 10px rgba(59, 130, 246, 0.3)' : 'none',
+                    transition: 'all 0.2s',
+                    outline: 'none'
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </div>
 
             </div>
-
           </div>
+        </div>
 
-          <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '11px', color: '#475569' }}>
-            {currentText.footer}
-          </div>
+        {/* Misconception Grid Header label */}
+        <div style={{ width: '100%', maxWidth: '780px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#64748b' }}>
+            {t.labelSuggested}
+          </span>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.02)' }} />
+        </div>
 
+        {/* 11 Example cards grid representing each world */}
+        <div style={{
+          width: '100%',
+          maxWidth: '780px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '8px',
+          marginBottom: '16px'
+        }}>
+          {worldsInfo[lang].map(world => (
+            <div
+              key={world.id}
+              onClick={() => onSubmit(world.text)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.01)',
+                border: '1px solid rgba(59, 130, 246, 0.08)',
+                borderRadius: '8px',
+                padding: '8px 10px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.2s ease',
+                boxSizing: 'border-box'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(59, 130, 246, 0.05)';
+                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.25)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.01)';
+                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.08)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                <span style={{ fontSize: '13px' }}>{world.icon}</span>
+                <span style={{ fontWeight: 700, fontSize: '10.5px', color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {world.name}
+                </span>
+              </div>
+              <p style={{ 
+                color: '#94a3b8', 
+                fontSize: '11.5px', 
+                margin: 0, 
+                lineHeight: 1.35,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}>
+                {world.text}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Footnote Branding */}
+        <div style={{ textAlign: 'center', fontSize: '10.5px', color: '#475569' }}>
+          {t.footer}
         </div>
 
       </div>
