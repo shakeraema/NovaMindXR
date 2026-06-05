@@ -15,26 +15,11 @@ export default function App() {
     setLang(l => l === 'EN' ? 'BN' : 'EN');
   };
 
-  const handleSubmit = async (input) => {
+  const handleSubmit = (input) => {
     setStudentInput(input);
-    setScreen('loading');
-    
-    try {
-      // Trigger the real Claude API diagnosis via local server
-      const result = await diagnoseConfusion(input);
-      
-      if (!result || !result.scene_config) {
-        throw new Error('Invalid diagnosis schema returned');
-      }
-      
-      setDiagnosisResult(result);
-      setScreen('simulation');
-    } catch (err) {
-      console.warn('Diagnosis failed, falling back to mock data:', err);
-      // Ensure the app remains robust and functional during local demo if API fails
-      setDiagnosisResult(getMockDiagnosisForInput(input));
-      setScreen('simulation');
-    }
+    const result = getMockDiagnosisForInput(input);
+    setDiagnosisResult(result);
+    setScreen('simulation');
   };
 
   if (screen === 'loading') {

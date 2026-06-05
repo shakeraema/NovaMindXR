@@ -5,9 +5,41 @@ import { learningLedger } from '../ai/blockchain';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
+const WORLD_SUGGESTIONS = {
+  EN: {
+    gravity_lab: "Why does the heavy ball fall at the exact same speed as the lighter one?",
+    orbit_sim: "Why doesn't the planet spiral into the sun even though gravity is pulling it?",
+    wave_lab: "How do two wave peaks cancel each other out in destructive interference?",
+    molecular: "Why does heating NaCl cause it to melt and separate?",
+    circuit_flow: "Does current get used up as it passes through the bulb?",
+    ocean: "Why does high salinity increase the buoyancy force on the diving probe?",
+    quantum_slit: "What happens to the interference pattern when we turn on the observer detector?",
+    relativity_run: "Why does the ship's length contract relative to the observer when speed increases?",
+    maxwell_demon: "How does the demon filter sort particles to reduce entropy?",
+    aerodynamics: "Why does the lift force suddenly drop when the angle of attack is too high?",
+    lenzs_law: "Why does a magnet fall so much slower in a copper tube than acrylic?"
+  },
+  BN: {
+    gravity_lab: "ভারী বলটি কেন হালকা বলটির সমান গতিতে নিচে পড়ে?",
+    orbit_sim: "মহাকর্ষ বল আকর্ষণ করা সত্ত্বেও গ্রহটি কেন সূর্যের মধ্যে পড়ে যায় না?",
+    wave_lab: "দুটি তরঙ্গের উপরিপাতে কীভাবে সম্পূর্ণ ধ্বংসাত্মক ব্যতিচার তৈরি হয়?",
+    molecular: "তাপমাত্রা বৃদ্ধির ফলে সোডিয়াম ক্লোরাইড (NaCl) কেন গলতে শুরু করে?",
+    circuit_flow: "কারেন্ট কি লাইট বাল্ব দিয়ে প্রবাহিত হওয়ার সময় কিছুটা কমে বা খরচ হয়ে যায়?",
+    ocean: "লবণাক্ততা বাড়লে ডুবুরি প্রোবের ওপর প্লবতা বল কীভাবে বাড়ে?",
+    quantum_slit: "ডিটেক্টর চালু করলে তরঙ্গের প্যাটার্ন কেন উধাও হয়ে যায়?",
+    relativity_run: "বেগ বাড়ার সাথে সাথে গতিশীল বস্তুর দৈর্ঘ্য কীভাবে সংকুচিত হয়?",
+    maxwell_demon: "ডেমন ফিল্টার কীভাবে কণা আলাদা করে এনট্রপি হ্রাস করে?",
+    aerodynamics: "উইং বা ডানার আক্রমণ কোণ বেশি হলে লিফট ফোর্স কেন হঠাৎ হ্রাস পায়?",
+    lenzs_law: "কপার টিউবের মধ্যে চুম্বকটি কেন এক্রিলিক টিউবের চেয়ে ধীরে পড়ে?"
+  }
+};
+
 export default function SimulationScreen({ result, studentInput, onBack, lang }) {
   const [mentorMessages, setMentorMessages] = useState([
-    { role: 'mentor', text: result?.mentor_opening || "What do you notice about how the objects are moving?" }
+    { role: 'mentor', text: lang === 'BN'
+      ? "স্বাগতম! আমি আপনার সক্রেটিক মেন্টর। আপনি নিচের পরামর্শমূলক প্রশ্নটি পরিবর্তন করতে পারেন অথবা সরাসরি জিজ্ঞেস করতে 'জিজ্ঞেস করুন' বাটনে ক্লিক করতে পারেন।"
+      : "Welcome! I am your AI Socratic Mentor. You can edit the preloaded question below and click Ask to begin your inquiry, or ask anything you wish."
+    }
   ]);
   const [mentorInput, setMentorInput] = useState('');
   const [mentorLoading, setMentorLoading] = useState(false);
@@ -16,6 +48,26 @@ export default function SimulationScreen({ result, studentInput, onBack, lang })
 
   // Track active environment and dynamic header updates
   const [activeEnv, setActiveEnv] = useState(result?.scene_config?.environment || 'gravity_lab');
+
+  // Preload suggested Socratic question based on environment & language
+  useEffect(() => {
+    const suggestions = WORLD_SUGGESTIONS[lang] || WORLD_SUGGESTIONS.EN;
+    const suggestion = suggestions[activeEnv] || suggestions.gravity_lab;
+    setMentorInput(suggestion);
+  }, [activeEnv, lang]);
+
+  // Dynamically translate the welcome Socratic message when language toggles
+  useEffect(() => {
+    setMentorMessages(prev => {
+      if (prev.length <= 1) {
+        const text = lang === 'BN'
+          ? "স্বাগতম! আমি আপনার সক্রেটিক মেন্টর। আপনি নিচের পরামর্শমূলক প্রশ্নটি পরিবর্তন করতে পারেন অথবা সরাসরি জিজ্ঞেস করতে 'জিজ্ঞেস করুন' বাটনে ক্লিক করতে পারেন।"
+          : "Welcome! I am your AI Socratic Mentor. You can edit the preloaded question below and click Ask to begin your inquiry, or ask anything you wish.";
+        return [{ role: 'mentor', text }];
+      }
+      return prev;
+    });
+  }, [lang]);
 
   // Accessibility & Blockchain states
   const [isListening, setIsListening] = useState(false);
@@ -177,9 +229,10 @@ export default function SimulationScreen({ result, studentInput, onBack, lang })
             misconceptionType: result.misconception_type,
             domain: result.domain,
             sceneConfig: result.scene_config,
-            currentGravity: liveConfig.gravity,
-            currentMass: liveConfig.mass
+            activeEnv,
+            liveConfig
           },
+          lang,
           history: mentorMessages.map(m => ({
             role: m.role === 'mentor' ? 'assistant' : 'user',
             content: m.text
