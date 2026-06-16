@@ -41,10 +41,16 @@ nivrita/
 
 # Plan and documentation files
 INITIAL_PLAN.md
-NovaMind XR — Phase 1 Implementation Plan.md
-novamind_mvp_plan.html
+*Plan.md
+*.html
 phase1.md
 phase1_architecture.svg
 phase1_walkthrough.md
+phase2.md
+phase2_data_flow.svg
+phase3.md
+observation.md
+full chat project.md
+
 
 
