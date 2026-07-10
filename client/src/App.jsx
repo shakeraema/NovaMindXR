@@ -15,11 +15,33 @@ export default function App() {
     setLang(l => l === 'EN' ? 'BN' : 'EN');
   };
 
-  const handleSubmit = (input) => {
+  const handleSubmit = async (input) => {
     setStudentInput(input);
-    const result = getMockDiagnosisForInput(input);
-    setDiagnosisResult(result);
-    setScreen('simulation');
+    setScreen('loading');
+    
+    try {
+      // Fetch diagnosis (falls back to mock if not configured or server down)
+      const diagnosisPromise = diagnoseConfusion(input).then(result => {
+        if (!result || !result.scene_config) {
+          return getMockDiagnosisForInput(input);
+        }
+        return result;
+      }).catch(err => {
+        console.warn("Diagnosis API failed, falling back to mock:", err);
+        return getMockDiagnosisForInput(input);
+      });
+      
+      // Keep loading screen active for at least 3.6 seconds so the cognitive scanning steps are visual
+      const delayPromise = new Promise(resolve => setTimeout(resolve, 3600));
+      
+      const [result] = await Promise.all([diagnosisPromise, delayPromise]);
+      setDiagnosisResult(result);
+      setScreen('simulation');
+    } catch (err) {
+      console.error("Diagnosis process error:", err);
+      setDiagnosisResult(getMockDiagnosisForInput(input));
+      setScreen('simulation');
+    }
   };
 
   if (screen === 'loading') {
